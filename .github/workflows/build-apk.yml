@@ -5,6 +5,11 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
