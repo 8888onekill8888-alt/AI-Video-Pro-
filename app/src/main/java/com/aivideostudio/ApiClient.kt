@@ -16,8 +16,8 @@ object ApiClient {
     private fun requestJson(url: String, method: String, body: ByteArray? = null): JSONObject {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.requestMethod = method
-        connection.connectTimeout = 10_000
-        connection.readTimeout = 120_000
+        connection.connectTimeout = 60_000
+        connection.readTimeout = 10 * 60_000
         connection.setRequestProperty("Accept", "application/json")
         if (body != null) {
             connection.doOutput = true
@@ -30,8 +30,8 @@ object ApiClient {
         val boundary = "----AIVideoStudio${UUID.randomUUID()}"
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
-        connection.connectTimeout = 15_000
-        connection.readTimeout = 300_000
+        connection.connectTimeout = 60_000
+        connection.readTimeout = 10 * 60_000
         connection.doOutput = true
         connection.setRequestProperty("Accept", "application/json")
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
