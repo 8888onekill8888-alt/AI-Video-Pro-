@@ -261,7 +261,7 @@ class MainActivity : ComponentActivity() {
                 } ?: "video.mp4"
                 val tempFile = File(cacheDir, "upload_${System.currentTimeMillis()}_${filename.replace(Regex("[^A-Za-z0-9._-]"), "_")}")
                 contentResolver.openInputStream(videoUri)?.use { input ->
-                    tempFile.outputStream().use(input::copyTo)
+                    tempFile.outputStream().use { output -> input.copyTo(output) }
                 } ?: error("Không thể đọc tệp video đã chọn.")
                 try {
                     val result = ApiClient.postVideo("$apiBaseUrl/api/video/translate", tempFile, language)
