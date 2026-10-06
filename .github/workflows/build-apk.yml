@@ -21,8 +21,12 @@ jobs:
 
       - name: Setup Android SDK & Accept Licenses Auto
         uses: android-actions/setup-android@v3
-        with:
-          log-accepted-android-sdk-licenses: true
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Install Android SDK build components
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
       - name: Build Android Debug APK
         run: ./gradlew assembleDebug
