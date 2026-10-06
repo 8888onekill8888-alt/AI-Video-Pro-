@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private var selectedVideo: Uri? = null
-    private var apiBaseUrl = BuildConfig.API_BASE_URL.trimEnd('/')
+    private var apiBaseUrl = BuildConfig.API_BASE_URL.ifBlank { "https://onrender.com" }.trimEnd('/')
     private var subtitleShadow = true
     private val waveFrames = listOf("▁ ▃ ▅ ▂ ▇ ▄ ▁ ▆ ▃ ▅ ▂ ▇ ▄", "▃ ▆ ▂ ▅ ▃ ▇ ▂ ▄ ▆ ▁ ▅ ▃ ▇", "▅ ▂ ▇ ▄ ▃ ▆ ▁ ▅ ▂ ▇ ▄ ▃ ▆")
     private val visualizerPulse = object : Runnable {
