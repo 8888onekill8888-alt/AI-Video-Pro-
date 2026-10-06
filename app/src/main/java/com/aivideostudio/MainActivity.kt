@@ -12,12 +12,15 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
+import com.bumptech.glide.Glide
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.Executors
@@ -221,6 +224,13 @@ class MainActivity : ComponentActivity() {
             try {
                 val response = ApiClient.postJson("$apiBaseUrl/api/video/generate", payload)
                 val scenes = response.optJSONArray("scenes")
+                val imageUrls = scenes?.let { sceneArray ->
+                    (0 until sceneArray.length()).mapNotNull { index ->
+                        sceneArray.optJSONObject(index)
+                            ?.optString("imageUrl")
+                            ?.takeIf(String::isNotBlank)
+                    }
+                }.orEmpty()
                 val summary = buildString {
                     append(response.optString("title", "Kịch bản phim"))
                     append("\nKịch bản: ").append(response.optString("scriptProvider", "Gemini"))
@@ -238,7 +248,29 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                runOnUiThread { findViewById<TextView>(R.id.generationResult).text = summary }
+                runOnUiThread {
+                    findViewById<TextView>(R.id.generationResult).text = summary
+                    val imageContainer = findViewById<LinearLayout>(R.id.generationImages)
+                    imageContainer.removeAllViews()
+                    val imageHeight = (240 * resources.displayMetrics.density).toInt()
+                    imageUrls.forEachIndexed { index, imageUrl ->
+                        val imageView = ImageView(this@MainActivity).apply {
+                            contentDescription = "Ảnh phân cảnh ${index + 1}"
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                imageHeight
+                            ).apply {
+                                topMargin = (8 * resources.displayMetrics.density).toInt()
+                            }
+                            scaleType = ImageView.ScaleType.CENTER_CROP
+                        }
+                        imageContainer.addView(imageView)
+                        Glide.with(this@MainActivity)
+                            .load(imageUrl)
+                            .centerCrop()
+                            .into(imageView)
+                    }
+                }
             } catch (error: Exception) {
                 runOnUiThread { toast("Không thể tạo kịch bản: ${error.message ?: "lỗi máy chủ"}") }
             } finally {
