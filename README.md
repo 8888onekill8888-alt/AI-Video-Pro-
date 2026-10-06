@@ -30,4 +30,4 @@ Set `OPENAI_API_KEY` and `MONGO_URI` in the backend environment. `PUBLIC_BASE_UR
 
 ## CI
 
-`.github/workflows/build-apk.yml` tests the backend and builds a release APK on pushes to `main` and manual dispatches, then publishes the installable `ai-video-studio-final-app` artifact. For a stable signing identity across releases, configure the `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_PASSWORD` repository secrets; without them CI signs using a temporary key. The APK is uploaded at its actual build size; the workflow does not fabricate or pad a 200 MB binary.
+`.github/workflows/build-apk.yml` tests the backend and runs `./gradlew assembleDebug` for native Android builds on pushes, pull requests to `main`, and manual dispatches. It publishes the automatically signed debug APK as the `ai-video-studio-final-app` artifact. The APK is uploaded at its actual build size; the workflow does not fabricate or pad a 200 MB binary.

@@ -1,7 +1,9 @@
-name: Build Android release APK
+name: Build Android APK
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -10,6 +12,7 @@ permissions:
 
 jobs:
   backend-test:
+    name: Test Node.js backend
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -23,11 +26,12 @@ jobs:
       - name: Install backend dependencies
         run: npm ci
         working-directory: backend
-      - name: Test backend API
+      - name: Run backend tests
         run: npm test
         working-directory: backend
 
-  build:
+  android-build:
+    name: Build native Android APK
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -37,56 +41,18 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-      - name: Install Android platform and build tools
+      - name: Install Android SDK components
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - name: Generate Gradle wrapper
-        run: gradle wrapper --gradle-version 8.9
-      - name: Build release APK
-        run: ./gradlew assembleRelease
-      - name: Sign release APK
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          unsigned="app/build/outputs/apk/release/app-release-unsigned.apk"
-          signed="app/build/outputs/apk/release/ai-video-studio.apk"
-          if [[ -n "$ANDROID_KEYSTORE_BASE64" ]]; then
-            test -n "$ANDROID_KEY_ALIAS"
-            test -n "$ANDROID_KEYSTORE_PASSWORD"
-            test -n "$ANDROID_KEY_PASSWORD"
-            keystore="$RUNNER_TEMP/release-keystore.jks"
-            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore"
-            store_password="$ANDROID_KEYSTORE_PASSWORD"
-            key_password="$ANDROID_KEY_PASSWORD"
-            key_alias="$ANDROID_KEY_ALIAS"
-          else
-            echo "::warning::Using an ephemeral signing key. This APK installs, but future releases cannot update it in place."
-            keystore="$RUNNER_TEMP/temporary-release-keystore.jks"
-            store_password="$(openssl rand -hex 24)"
-            key_password="$store_password"
-            key_alias="ai-video-studio-temporary"
-            keytool -genkeypair -noprompt -keystore "$keystore" -storepass "$store_password" \
-              -keypass "$key_password" -alias "$key_alias" -keyalg RSA -keysize 2048 \
-              -validity 10000 -dname "CN=AI Video Studio, OU=Build, O=AI Video Studio, L=NA, ST=NA, C=US"
-          fi
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign \
-            --ks "$keystore" --ks-key-alias "$key_alias" \
-            --ks-pass "pass:$store_password" --key-pass "pass:$key_password" \
-            --out "$signed" "$unsigned"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify "$signed"
-      - name: Upload production APK
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build native Android debug APK
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: ai-video-studio-final-app
-          path: app/build/outputs/apk/release/ai-video-studio.apk
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
