@@ -223,6 +223,8 @@ class MainActivity : ComponentActivity() {
                 val scenes = response.optJSONArray("scenes")
                 val summary = buildString {
                     append(response.optString("title", "Kịch bản phim"))
+                    append("\nKịch bản: ").append(response.optString("scriptProvider", "Gemini"))
+                    append(" · Ảnh: ").append(response.optString("imageProvider", "Pollinations AI"))
                     if (scenes != null) {
                         for (index in 0 until scenes.length()) {
                             val scene = scenes.getJSONObject(index)
@@ -230,7 +232,9 @@ class MainActivity : ComponentActivity() {
                             append(scene.optString("narration", scene.optString("description")))
                             append("\nHình ảnh: ")
                             append(scene.optString("imagePrompt"))
-                            if (scene.has("imageUrl")) append("\nẢnh: ").append(scene.optString("imageUrl"))
+                            if (scene.has("imageUrl")) {
+                                append("\nẢnh phân cảnh: ").append(scene.optString("imageUrl"))
+                            }
                         }
                     }
                 }
@@ -267,7 +271,12 @@ class MainActivity : ComponentActivity() {
                     val result = ApiClient.postVideo("$apiBaseUrl/api/video/translate", tempFile, language)
                     runOnUiThread {
                         findViewById<TextView>(R.id.translationResult).text =
-                            "Đã xử lý: ${result.optString("downloadUrl", "hoàn tất")}"
+                            buildString {
+                                append("Lồng tiếng: ").append(result.optString("voice", "gTTS"))
+                                append("\n\nBản chép lời:\n").append(result.optString("transcript"))
+                                append("\n\nBản dịch:\n").append(result.optString("translatedScript"))
+                                append("\n\nVideo: ").append(result.optString("downloadUrl", "hoàn tất"))
+                            }
                     }
                 } finally {
                     tempFile.delete()

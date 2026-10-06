@@ -21,12 +21,13 @@ Email account screens and Google/Facebook/Apple buttons are interface scaffoldin
 cd backend
 cp .env.example .env
 npm install
+python3 -m pip install -r requirements.txt
 npm start
 ```
 
-Set `OPENAI_API_KEY` and `MONGO_URI` in the backend environment. `PUBLIC_BASE_URL` and comma-separated `DISCOVERY_URLS` advertise reachable API nodes. Restrict `CORS_ORIGINS` in deployments. Video uploads default to a 500 MB limit and processed files are served from `/outputs`.
+Set `GEMINI_API_KEY` to a Google AI Studio API key (the Gemini free tier is available subject to Google's quotas), and set `MONGO_URI` if database persistence is needed. Install the Python dependency with `python3 -m pip install -r requirements.txt` from `backend/`; gTTS uses Google's public text-to-speech service and requires outbound network access. `PYTHON_BIN` can override the Python executable. `GEMINI_MODEL` defaults to `gemini-2.5-flash`. `PUBLIC_BASE_URL` and comma-separated `DISCOVERY_URLS` advertise reachable API nodes. Restrict `CORS_ORIGINS` in deployments. Video uploads default to a 500 MB limit and processed files are served from `/outputs`.
 
-`POST /api/video/generate` creates a Vietnamese screenplay and English scene image prompts with `gpt-4o`. Set `generateImages: true` to generate DALL·E 3 stills for up to four scenes (each image call may incur OpenAI charges); it does not render a movie. `POST /api/video/translate` accepts multipart fields `video` and `targetLanguage`, transcribes with Whisper, translates with `gpt-4o`, generates standard localized TTS audio, and replaces the source audio using FFmpeg. It does not clone a person's voice or preserve the original dialogue/music mix. Add authentication, rate limiting, and managed object storage before exposing the API publicly.
+`POST /api/video/generate` creates a Vietnamese screenplay and English scene image prompts with Gemini. Set `generateImages: true` to attach direct Pollinations AI image URLs to the scenes; images are generated when opened, without an API key. `POST /api/video/translate` accepts multipart fields `video` and `targetLanguage`, transcribes and translates with Gemini, synthesizes localized speech with gTTS, and replaces the source audio using FFmpeg. The included languages are Vietnamese, English, Spanish, French, Japanese, and Korean. This does not clone a person's voice or preserve the original dialogue/music mix. Gemini free-tier quotas, Pollinations availability/rate limits, and Google's gTTS service limits may change; none of these free services is guaranteed to be unlimited or always available. Add authentication, rate limiting, and managed object storage before exposing the API publicly.
 
 ## CI
 
