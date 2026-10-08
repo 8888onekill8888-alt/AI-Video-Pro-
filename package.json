@@ -1,0 +1,38 @@
+{
+  "name": "cineforge-ai",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/mobile",
+    "services/api",
+    "services/worker",
+    "packages/shared",
+    "packages/providers"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,mobile -c cyan,magenta \"npm:dev:api\" \"npm:dev:mobile\"",
+    "dev:api": "npm run dev -w @storyflix/api",
+    "dev:mobile": "npm run start -w @storyflix/mobile",
+    "dev:worker": "npm run dev -w @storyflix/worker",
+    "build": "npm run typecheck && npm run build:api && npm run build:worker",
+    "build:api": "npm run build -w @storyflix/api",
+    "build:worker": "npm run build -w @storyflix/worker",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings=0",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:api": "npm run test -w @storyflix/api",
+    "mobile:android": "npm run android -w @storyflix/mobile",
+    "mobile:check": "npm run export:android -w @storyflix/mobile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.24.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.29.0",
+    "prettier": "^3.6.2"
+  }
+}

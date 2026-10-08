@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "CINEFORGE AI",
+    "slug": "cineforge-ai",
+    "scheme": "cineforge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cineforge.ai"
+    },
+    "android": {
+      "package": "com.cineforge.ai",
+      "adaptiveIcon": {
+        "backgroundColor": "#101613"
+      },
+      "permissions": [
+        "INTERNET",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
